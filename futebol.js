@@ -2,30 +2,40 @@ const express = require('express');
 const app = express();
 const PORT = 3015;
 
-// Configuração para analisar JSON no corpo da requisição
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rota para receber os dados do frontend via POST
-app.post('/', (req, res) => {
+let dadosRecebidos = null;
+
+
+app.post('/time', (req, res) => {
   const { nomeTime, jogadores, treinador, titulo, estadio, fundacao } = req.body;
 
-  // Verifica se foram fornecidos todos os 6 dados
+  
   if (nomeTime && jogadores && treinador && titulo && estadio && fundacao) {
+    dadosRecebidos = {
+      nomeTime,
+      jogadores,
+      treinador,
+      titulo,
+      estadio,
+      fundacao
+    };
     res.status(200).send('Dados recebidos com sucesso!');
   } else {
-    // Caso não sejam fornecidos todos os 6 dados, envia uma mensagem de erro
+    
     res.status(400).send('Erro: Todos os 6 dados devem ser fornecidos.');
   }
 });
 
-// Rota para exibir os dados no navegador
-app.get('/', (req, res) => {
-  const { nomeTime, jogadores, treinador, titulo, estadio, fundacao } = req.query;
 
-  // Verifica se foram fornecidos todos os 6 dados
-  if (nomeTime && jogadores && treinador && titulo && estadio && fundacao) {
-    // Constrói a resposta HTML com os dados recebidos
+app.get('/time', (req, res) => {
+  if (dadosRecebidos) {
+   
+    const { nomeTime, jogadores, treinador, titulo, estadio, fundacao } = dadosRecebidos;
+
+    
     const responseHTML = `
       <h1>Dados Recebidos</h1>
       <p><strong>Nome do Time:</strong> ${nomeTime}</p>
@@ -36,15 +46,15 @@ app.get('/', (req, res) => {
       <p><strong>Fundação:</strong> ${fundacao}</p>
     `;
 
-    // Envia a resposta HTML ao navegador
+  
     res.send(responseHTML);
   } else {
-    // Caso não sejam fornecidos todos os 6 dados, envia uma mensagem de erro
-    res.status(400).send('Erro: Todos os 6 dados devem ser fornecidos.');
+    
+    res.status(400).send('Erro: Nenhum dado recebido ainda.');
   }
 });
 
-// Inicia o servidor
+
 app.listen(PORT, () => {
   console.log(`Servidor iniciado na porta ${PORT}`);
 });
